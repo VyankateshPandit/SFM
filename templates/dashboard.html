@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block body %}
+      
+    <!-- Dashboard Content -->
+    <div class="container flex-grow-1">
+      <div class="dashboard-content text-center mt-4">
+        <h2 style="color: #bb86fc">Welcome to Dashboard</h2>
+        <div class="welcome-card">
+          <p class="mb-0">
+            Logged in as: <strong>{{first_name}} {{last_name}}</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- Two-Column Section -->
+    <div class="container ">
+      <div class="row">
+        <!-- Left Section - Finance Calculators -->
+        <div class="col-lg-6 col-md-12 d-flex align-items-stretch">
+          <div class="dashboard-content w-100 text-center p-4">
+            <h4 style="color: #bb86fc">Finance Calculators</h4>
+            <p class="mb-3">
+              Take control of your finances with our powerful calculators.
+              <br>  
+              Plan today, secure tomorrow!
+            </p>
+            <a href="{{ url_for('sip_cal') }}" class="btn custom-purple-btn w-100 my-2">
+              <i class="bi bi-calculator me-2"></i>SIP Calculator
+            </a>
+            <a href="{{ url_for('lumsum_cal') }}" class="btn custom-purple-btn w-100 my-2">
+              <i class="bi bi-graph-up-arrow me-2"></i>Lumpsum Calculator
+            </a>
+          
+          </div>
+        </div>
+        
+    
+        <!-- Right Section - Scrollable Content -->
+        <div class="col-lg-6 col-md-12 d-flex align-items-stretch">
+          <div class="dashboard-content w-100 p-4 text-center" 
+               style="max-height: 300px; overflow-y: auto;">
+            <h3 style="color: #bb86fc; font-weight: bold">Smart Finance Manager</h3>
+            <p>
+              Your ultimate financial companion to track expenses, manage budgets, and make informed decisions effortlessly.
+            </p>
+            <ul class="text-start">
+              <li class="mb-2">
+                <b>Expense & Income Tracking</b> – Keep a detailed record of your financial transactions.
+              </li>
+              <li class="mb-2">
+                <b>Category-Based Insights</b> – Understand and optimize your spending habits.
+              </li>
+              <li class="mb-2">
+                <b>Budget Planning & Goal Setting</b> – Take control of your financial future.
+              </li>
+              <li class="mb-2">
+                <b>Advanced Analytics & Reports</b> – Make data-driven financial decisions.
+              </li>
+              <li class="mb-2">
+                <b>Ask AI</b> – Get personalized financial insights and recommendations using AI.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      </div>
+    </div>
+
+    {% endblock body %}

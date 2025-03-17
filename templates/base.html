@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Finance Manager</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #121212;
+        color: #ffffff;
+        font-family: "Arial", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .navbar {
+        background-color: #1e1e1e !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      }
+      .navbar-brand,
+      .navbar-nav .nav-link {
+        color: #bb86fc !important;
+      }
+      .navbar-nav .nav-link:hover {
+        color: #03dac6 !important;
+        transition: color 0.3s ease;
+      }
+      .navbar-nav .nav-link.active {
+        color: #03dac6 !important;
+        font-weight: 500;
+      }
+      .dashboard-content {
+        background-color: #1e1e1e;
+        border-radius: 12px;
+        padding: 30px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      }
+      .dashboard-content::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .dashboard-content::-webkit-scrollbar-track {
+        background: #1e1e1e;
+        border-radius: 4px;
+      }
+
+      .dashboard-content::-webkit-scrollbar-thumb {
+        background: #121212;
+        border-radius: 4px;
+      }
+
+      .active-section {
+        background-color: #2c2c2c;
+        border-radius: 8px;
+      }
+      .btn-outline-danger {
+        border-color: #cf6679;
+        color: #cf6679;
+      }
+      .btn-outline-danger:hover {
+        background-color: #cf6679;
+        color: #ffffff;
+      }
+      .welcome-card {
+        background-color: #2c2c2c;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+      .custom-purple-btn {
+        background-color: #121212;
+        color: #bb86fc;
+        border: none;
+      }
+      .custom-purple-btn:hover {
+        color: #bb86fc;
+        background-color: #000000;
+      }
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .dashboard-content {
+          padding: 20px;
+        }
+        .container {
+          padding-left: 15px;
+          padding-right: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+      <div class="container">
+        <a class="navbar-brand" id="title" href="{{ url_for('dashboard') }}">
+          <i class="bi bi-cash-coin me-2"></i>Smart Finance Manager
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a
+                class="nav-link active"
+                aria-current="page"
+                href="{{ url_for('dashboard') }}"
+              >
+                <i class="bi bi-house me-2"></i>Home
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{url_for('expenses')}}">
+                <i class="bi bi-calculator me-2"></i>Expenses
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('graph') }}">
+                <i class="bi bi-graph-up me-2"></i>Graphs
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('profile') }}">
+                <i class="bi bi-person me-2"></i>Profile
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('contact') }}">
+                <i class="bi bi-envelope me-2"></i>Contact
+              </a>
+            </li>
+          </ul>
+          <div class="d-flex">
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">
+              <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Changed reload function to use url_for correctly
+      function reload() {
+        window.location.href = "{{ url_for('dashboard') }}";
+      }
+
+      // Navigation section switching
+      document.querySelectorAll(".nav-link").forEach((link) => {
+        link.addEventListener("click", function (e) {
+          if (this.getAttribute("href").startsWith("#")) {
+            e.preventDefault();
+          }
+
+          document.querySelectorAll(".nav-link").forEach((navLink) => {
+            navLink.classList.remove("active");
+          });
+
+          this.classList.add("active");
+        });
+      });
+
+      document
+        .querySelectorAll(".navbar-nav .nav-link")
+        .forEach(function (navLink) {
+          navLink.addEventListener("click", function () {
+            if (window.innerWidth < 992) {
+              const navbarToggler = document.querySelector(".navbar-toggler");
+              if (!navbarToggler.classList.contains("collapsed")) {
+                navbarToggler.click();
+              }
+            }
+          });
+        });
+    </script>
+    {% block body %} {% endblock body %}
+  </body>
+</html>

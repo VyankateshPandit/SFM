@@ -1,0 +1,290 @@
+{% extends 'base.html' %} {% block body %}
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<style>
+  body {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: "Arial", sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+  }
+  .navbar {
+    background-color: #1e1e1e !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+  .navbar-brand,
+  .navbar-nav .nav-link {
+    color: #bb86fc !important;
+  }
+  .navbar-nav .nav-link:hover {
+    color: #03dac6 !important;
+    transition: color 0.3s ease;
+  }
+  .navbar-nav .nav-link.active {
+    color: #03dac6 !important;
+    font-weight: 500;
+  }
+  .container-fluid {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+  .graph-content {
+    background-color: #1e1e1e;
+    border-radius: 0;
+    padding: 20px;
+    margin: 0;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    flex-grow: 1;
+  }
+  .graph-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+    width: 100%;
+  }
+  .graph-column {
+    flex: 1 0 100%;
+    padding: 10px;
+  }
+  .graph-card {
+    background-color: #2c2c2c;
+    border-radius: 8px;
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .chart-container {
+    position: relative;
+    flex-grow: 1;
+    min-height: 250px;
+  }
+  .btn-outline-danger {
+    border-color: #cf6679;
+    color: #cf6679;
+  }
+  .btn-outline-danger:hover {
+    background-color: #cf6679;
+    color: #ffffff;
+  }
+  /* Responsive adjustments */
+  @media (min-width: 768px) {
+    .graph-column {
+      flex: 0 0 50%;
+    }
+    .graph-column.full-width {
+      flex: 0 0 100%;
+    }
+  }
+  @media (min-width: 1200px) {
+    .graph-content {
+      padding: 30px;
+    }
+  }
+</style>
+
+<!-- Graph Content -->
+<div class="container-fluid flex-grow-1 d-flex flex-column">
+  <div class="graph-content">
+    <h2 class="text-center mb-4" style="color: #bb86fc">Financial Graphs</h2>
+
+    <div class="graph-row">
+      <div class="graph-column">
+        <div class="graph-card">
+          <h4 class="mb-3">Expense Categories</h4>
+          <div class="chart-container">
+            <canvas id="categoriesChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="graph-column">
+        <div class="graph-card">
+          <h4 class="mb-3">Category Expenses</h4>
+          <div class="chart-container">
+            <canvas id="categoryLineChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Get expense data from Flask backend variables
+    const categoryTotals = {
+      Food: {{ expense_data.food }},
+      Travel: {{ expense_data.travel }},
+      Entertainment: {{ expense_data.entertainment }},
+      Shopping: {{ expense_data.shopping }},
+      Other: {{ expense_data.other }}
+    };
+
+    // Get category data for charts
+    const categoryLabels = Object.keys(categoryTotals);
+    const categoryValues = Object.values(categoryTotals);
+
+    // Function to maintain responsive charts
+    function resizeCharts() {
+      categoriesChart.resize();
+      categoryLineChart.resize();
+    }
+
+    // Add resize listener
+    window.addEventListener("resize", function () {
+      setTimeout(resizeCharts, 100);
+    });
+
+    // Expense Categories Chart (Pie Chart)
+    const categoriesCtx = document
+      .getElementById("categoriesChart")
+      .getContext("2d");
+    const categoriesChart = new Chart(categoriesCtx, {
+      type: "doughnut",
+      data: {
+        labels: categoryLabels,
+        datasets: [
+          {
+            data: categoryValues,
+            backgroundColor: [
+              "rgba(187, 134, 252, 0.7)",
+              "rgba(3, 218, 198, 0.7)",
+              "rgba(255, 193, 7, 0.7)",
+              "rgba(207, 102, 121, 0.7)",
+              "rgba(111, 66, 193, 0.7)",
+            ],
+            borderColor: [
+              "rgba(187, 134, 252, 1)",
+              "rgba(3, 218, 198, 1)",
+              "rgba(255, 193, 7, 1)",
+              "rgba(207, 102, 121, 1)",
+              "rgba(111, 66, 193, 1)",
+            ],
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "right",
+            labels: {
+              color: "#ffffff",
+            },
+          },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                return `${context.label}: Rs ${context.raw.toFixed(2)}`;
+              }
+            }
+          }
+        },
+      },
+    });
+
+    // Find the maximum value for setting the y-axis scale
+    const maxCategoryValue = Math.max(...categoryValues);
+
+    // Category Line Chart
+    const categoryLineCtx = document
+      .getElementById("categoryLineChart")
+      .getContext("2d");
+
+    // Colors for the bars in the line chart - match pie chart colors
+    const categoryColors = [
+      { bg: "rgba(187, 134, 252, 0.7)", border: "rgba(187, 134, 252, 1)" },
+      { bg: "rgba(3, 218, 198, 0.7)", border: "rgba(3, 218, 198, 1)" },
+      { bg: "rgba(255, 193, 7, 0.7)", border: "rgba(255, 193, 7, 1)" },
+      { bg: "rgba(207, 102, 121, 0.7)", border: "rgba(207, 102, 121, 1)" },
+      { bg: "rgba(111, 66, 193, 0.7)", border: "rgba(111, 66, 193, 1)" },
+    ];
+
+    // Create a bar chart instead of a line chart to show category values directly
+    const categoryLineChart = new Chart(categoryLineCtx, {
+      type: "bar",
+      data: {
+        labels: categoryLabels,
+        datasets: [
+          {
+            label: "Expense Amount",
+            data: categoryValues,
+            backgroundColor: categoryLabels.map(
+              (_, i) => categoryColors[i % categoryColors.length].bg
+            ),
+            borderColor: categoryLabels.map(
+              (_, i) => categoryColors[i % categoryColors.length].border
+            ),
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: "y", // Make it a horizontal bar chart
+        plugins: {
+          legend: {
+            display: false, // Hide legend since we don't need it here
+          },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                return `${context.label}: Rs ${context.raw.toFixed(2)}`;
+              },
+            },
+          },
+        },
+        scales: {
+          y: {
+            grid: {
+              color: "rgba(255, 255, 255, 0.1)",
+            },
+            ticks: {
+              color: "#ffffff",
+            },
+          },
+          x: {
+            beginAtZero: true,
+            max: maxCategoryValue * 1.1, // Set max value slightly higher than the highest category
+            grid: {
+              color: "rgba(255, 255, 255, 0.1)",
+            },
+            ticks: {
+              color: "#ffffff",
+              callback: function (value) {
+                return "Rs " + value;
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  // Close the navbar collapse on mobile when a link is clicked
+  document
+    .querySelectorAll(".navbar-nav .nav-link")
+    .forEach(function (navLink) {
+      navLink.addEventListener("click", function () {
+        if (window.innerWidth < 992) {
+          const navbarToggler = document.querySelector(".navbar-toggler");
+          if (!navbarToggler.classList.contains("collapsed")) {
+            navbarToggler.click();
+          }
+        }
+      });
+    });
+</script>
+{% endblock body %}

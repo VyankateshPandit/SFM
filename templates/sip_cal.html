@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SIP Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+      :root {
+        --background-color: #121212;
+        --card-background: #1e1e1e;
+        --primary-color: #bb86fc;
+        --secondary-color: #03dac6;
+        --text-color: #e0e0e0;
+        --light-text: #a0a0a0;
+        --dark-purple: #9370db;
+        --slider-bg: #333333;
+        --slider-fill-bg: var(--primary-color);
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: var(--background-color);
+        color: var(--text-color);
+      }
+
+      .container {
+        max-width: 900px;
+        width: 95%;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: var(--card-background);
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .logo {
+        width: 50px;
+        height: 50px;
+        background-color: rgba(187, 134, 252, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        margin-bottom: 10px;
+      }
+
+      .logo span {
+        color: var(--primary-color);
+        font-weight: bold;
+        font-size: 18px;
+      }
+
+      h1 {
+        font-size: 24px;
+        font-weight: 500;
+        margin: 0;
+        color: var(--primary-color);
+      }
+
+      .back-button {
+        display: flex;
+        align-items: center;
+        color: var(--secondary-color);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        margin-right: auto;
+        margin-bottom: 10px;
+        transition: all 0.2s ease;
+        padding: 6px 12px;
+        background-color: rgba(3, 218, 198, 0.1);
+        border-radius: 8px;
+        border: 1px solid rgba(3, 218, 198, 0.3);
+      }
+
+      .back-button:hover {
+        background-color: rgba(3, 218, 198, 0.2);
+      }
+
+      .back-button .back-icon {
+        margin-right: 6px;
+      }
+
+      .title-container {
+        display: flex;
+        align-items: center;
+      }
+
+      .calculator {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px;
+      }
+
+      .input-section {
+        flex: 1;
+        min-width: 280px;
+      }
+
+      .result-section {
+        flex: 1;
+        min-width: 280px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-left: 1px solid #333;
+        padding-left: 20px;
+      }
+
+      .input-group {
+        margin-bottom: 30px;
+      }
+
+      .input-group h3 {
+        margin-bottom: 5px;
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--primary-color);
+      }
+
+      .value-display {
+        background-color: rgba(187, 134, 252, 0.1);
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin: 10px 0;
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--primary-color);
+        display: inline-block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        border: 1px solid rgba(187, 134, 252, 0.3);
+        cursor: text;
+        transition: background-color 0.2s ease;
+      }
+
+      .value-display.editable {
+        background-color: rgba(187, 134, 252, 0.2);
+        border: 1px solid rgba(187, 134, 252, 0.5);
+      }
+
+      .value-display .currency {
+        font-size: 18px;
+        margin-right: 5px;
+      }
+
+      .editable-input {
+        background: transparent;
+        border: none;
+        color: var(--primary-color);
+        font-size: 20px;
+        font-weight: 500;
+        width: calc(100% - 20px);
+        outline: none;
+        font-family: inherit;
+      }
+
+      .slider-container {
+        position: relative;
+        height: 6px;
+        background-color: var(--slider-bg);
+        border-radius: 3px;
+        margin: 25px 0 10px;
+      }
+
+      .slider-fill {
+        position: absolute;
+        height: 100%;
+        background-color: var(--slider-fill-bg);
+        border-radius: 3px 0 0 3px;
+      }
+
+      .slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 6px;
+        background: transparent;
+        outline: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin: 0;
+        z-index: 2;
+      }
+
+      .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--card-background);
+        cursor: pointer;
+        border: 2px solid var(--primary-color);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      }
+
+      .slider::-moz-range-thumb {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--card-background);
+        cursor: pointer;
+        border: 2px solid var(--primary-color);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      }
+
+      .chart-container {
+        width: 100%;
+        max-width: 250px;
+        max-height: 250px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      .chart-legend {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+      }
+
+      .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        margin-right: 8px;
+        flex-shrink: 0;
+      }
+
+      .invested-color {
+        background-color: rgba(187, 134, 252, 0.6);
+      }
+
+      .returns-color {
+        background-color: var(--secondary-color);
+      }
+
+      .summary {
+        margin-top: 20px;
+        background-color: rgba(3, 218, 198, 0.1);
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        width: 100%;
+        border: 1px solid rgba(3, 218, 198, 0.3);
+      }
+
+      .summary h3 {
+        margin: 0 0 15px 0;
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--secondary-color);
+      }
+
+      .summary-values {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        gap: 10px;
+      }
+
+      .summary-item {
+        flex: 1;
+        min-width: 100px;
+        padding: 5px;
+      }
+
+      .summary-label {
+        font-size: 14px;
+        color: var(--light-text);
+        margin-bottom: 5px;
+      }
+
+      .summary-value {
+        font-size: 16px;
+        font-weight: 500;
+        word-break: break-word;
+        color: var(--secondary-color);
+      }
+
+      /* Media Queries for Responsive Design */
+      @media (max-width: 768px) {
+        .container {
+          padding: 15px;
+          margin: 10px auto;
+        }
+
+        .calculator {
+          flex-direction: column;
+        }
+
+        .input-section,
+        .result-section {
+          width: 100%;
+        }
+
+        .result-section {
+          border-left: none;
+          border-top: 1px solid #333;
+          padding-left: 0;
+          padding-top: 20px;
+        }
+
+        .chart-container {
+          max-width: 200px;
+          max-height: 200px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .header {
+          justify-content: center;
+          text-align: center;
+          flex-direction: column;
+        }
+
+        .logo {
+          margin-right: 0;
+          margin-bottom: 10px;
+        }
+
+        .value-display {
+          width: 100%;
+          box-sizing: border-box;
+          text-align: center;
+        }
+
+        .summary-values {
+          flex-direction: column;
+        }
+
+        .summary-item {
+          margin-bottom: 10px;
+        }
+
+        .chart-container {
+          max-width: 180px;
+          max-height: 180px;
+        }
+
+        .back-button {
+          margin: 0 0 15px 0;
+        }
+      }
+
+      @media (pointer: coarse) {
+        .slider::-webkit-slider-thumb {
+          width: 28px;
+          height: 28px;
+        }
+
+        .slider::-moz-range-thumb {
+          width: 28px;
+          height: 28px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a href="/dashboard" class="back-button">
+        <span class="back-icon">←</span>
+        <span>Back to Dashboard</span>
+      </a>
+
+      <div class="header">
+        <div class="logo">
+          <span>SIP</span>
+        </div>
+        <h1>Calculator</h1>
+      </div>
+
+      <div class="calculator">
+        <div class="input-section">
+          <div class="input-group">
+            <h3>Monthly investment</h3>
+            <div class="value-display" id="investment-display">
+              <span class="currency">₹</span>
+              <span id="investment-value" class="editable-value">624600</span>
+            </div>
+            <div class="slider-container">
+              <div class="slider-fill" id="investment-fill"></div>
+              <input
+                type="range"
+                min="500"
+                max="1000000"
+                step="100"
+                value="624600"
+                class="slider"
+                id="investment-slider"
+              />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <h3>Expected return rate (p.a)</h3>
+            <div class="value-display">
+              <span id="rate-value">11.4</span>
+              <span>%</span>
+            </div>
+            <div class="slider-container">
+              <div class="slider-fill" id="rate-fill"></div>
+              <input
+                type="range"
+                min="1"
+                max="30"
+                step="0.1"
+                value="11.4"
+                class="slider"
+                id="rate-slider"
+              />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <h3>Time period</h3>
+            <div class="value-display">
+              <span id="period-value">13</span>
+              <span>Yr</span>
+            </div>
+            <div class="slider-container">
+              <div class="slider-fill" id="period-fill"></div>
+              <input
+                type="range"
+                min="1"
+                max="30"
+                step="1"
+                value="13"
+                class="slider"
+                id="period-slider"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="result-section">
+          <div class="chart-container">
+            <canvas id="donutChart"></canvas>
+          </div>
+
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-color invested-color"></div>
+              <span>Invested amount</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color returns-color"></div>
+              <span>Est. returns</span>
+            </div>
+          </div>
+
+          <div class="summary">
+            <h3>Total Value</h3>
+            <div class="summary-values">
+              <div class="summary-item">
+                <div class="summary-label">Invested Amount</div>
+                <div class="summary-value">
+                  ₹<span id="total-invested">0</span>
+                </div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">Est. Returns</div>
+                <div class="summary-value">
+                  ₹<span id="total-returns">0</span>
+                </div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">Total Value</div>
+                <div class="summary-value">
+                  ₹<span id="total-value">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Initialize variables
+      let monthlyInvestment = 624600;
+      let expectedReturnRate = 11.4;
+      let timePeriod = 13;
+      let donutChart;
+      let isEditingInvestment = false;
+
+      // Initialize chart
+      function initChart() {
+        const ctx = document.getElementById("donutChart").getContext("2d");
+
+        // Set Chart.js default colors for dark theme
+        Chart.defaults.color = "#e0e0e0";
+        Chart.defaults.borderColor = "#333333";
+
+        donutChart = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: ["Invested amount", "Est. returns"],
+            datasets: [
+              {
+                data: [100, 0],
+                backgroundColor: ["rgba(187, 134, 252, 0.6)", "#03DAC6"],
+                borderWidth: 1,
+                borderColor: "#1e1e1e",
+                hoverBorderColor: "#333333",
+                cutout: "70%",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                backgroundColor: "#2d2d2d",
+                titleColor: "#e0e0e0",
+                bodyColor: "#e0e0e0",
+                borderColor: "#444444",
+                borderWidth: 1,
+                padding: 12,
+                displayColors: true,
+                callbacks: {
+                  label: function (context) {
+                    const label = context.label || "";
+                    const value = context.raw;
+                    return label + ": ₹" + value.toLocaleString();
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // Update slider fill
+      function updateSliderFill(slider, fill) {
+        const min = parseFloat(slider.min);
+        const max = parseFloat(slider.max);
+        const val = parseFloat(slider.value);
+        const percentage = ((val - min) / (max - min)) * 100;
+        fill.style.width = percentage + "%";
+      }
+
+      // Initialize all sliders
+      function initSliders() {
+        const investmentSlider = document.getElementById("investment-slider");
+        const investmentFill = document.getElementById("investment-fill");
+        const investmentValue = document.getElementById("investment-value");
+        const investmentDisplay = document.getElementById("investment-display");
+
+        const rateSlider = document.getElementById("rate-slider");
+        const rateFill = document.getElementById("rate-fill");
+        const rateValue = document.getElementById("rate-value");
+
+        const periodSlider = document.getElementById("period-slider");
+        const periodFill = document.getElementById("period-fill");
+        const periodValue = document.getElementById("period-value");
+
+        // Set initial fill values
+        updateSliderFill(investmentSlider, investmentFill);
+        updateSliderFill(rateSlider, rateFill);
+        updateSliderFill(periodSlider, periodFill);
+
+        // Add event listeners
+        investmentSlider.addEventListener("input", function () {
+          monthlyInvestment = parseFloat(this.value);
+          investmentValue.textContent = monthlyInvestment.toLocaleString();
+          updateSliderFill(this, investmentFill);
+          calculateSIP();
+        });
+
+        rateSlider.addEventListener("input", function () {
+          expectedReturnRate = parseFloat(this.value);
+          rateValue.textContent = expectedReturnRate.toFixed(1);
+          updateSliderFill(this, rateFill);
+          calculateSIP();
+        });
+
+        periodSlider.addEventListener("input", function () {
+          timePeriod = parseInt(this.value);
+          periodValue.textContent = timePeriod;
+          updateSliderFill(this, periodFill);
+          calculateSIP();
+        });
+
+        // Make investment amount editable
+        investmentDisplay.addEventListener("click", function () {
+          if (isEditingInvestment) return;
+
+          isEditingInvestment = true;
+          investmentDisplay.classList.add("editable");
+
+          // Create input element
+          const input = document.createElement("input");
+          input.type = "text";
+          input.className = "editable-input";
+          input.value = monthlyInvestment.toLocaleString();
+
+          // Replace the value span with the input
+          const valueSpan = investmentValue;
+          const currencySpan = investmentDisplay.querySelector(".currency");
+
+          investmentDisplay.innerHTML = "";
+          investmentDisplay.appendChild(currencySpan);
+          investmentDisplay.appendChild(input);
+
+          input.focus();
+          input.select();
+
+          // Handle input blur event
+          input.addEventListener("blur", function () {
+            finishEditing(
+              input,
+              investmentDisplay,
+              investmentValue,
+              investmentSlider
+            );
+          });
+
+          // Handle Enter key
+          input.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+              input.blur();
+            }
+          });
+        });
+      }
+
+      // Finish editing the investment amount
+      function finishEditing(input, display, valueSpan, slider) {
+        isEditingInvestment = false;
+        display.classList.remove("editable");
+
+        // Parse and validate the input value
+        let newValue = input.value.replace(/[^\d]/g, "");
+        newValue = parseInt(newValue) || monthlyInvestment;
+
+        // Clamp the value to slider range
+        const min = parseInt(slider.min);
+        const max = parseInt(slider.max);
+        newValue = Math.max(min, Math.min(max, newValue));
+
+        // Update the monthly investment value
+        monthlyInvestment = newValue;
+
+        // Restore original display structure
+        const currencySpan = display.querySelector(".currency");
+        display.innerHTML = "";
+        display.appendChild(currencySpan);
+        display.appendChild(valueSpan);
+
+        // Update displayed value and slider
+        valueSpan.textContent = newValue.toLocaleString();
+        slider.value = newValue;
+        updateSliderFill(slider, document.getElementById("investment-fill"));
+
+        // Recalculate SIP
+        calculateSIP();
+      }
+
+      // Calculate SIP values and update UI
+      function calculateSIP() {
+        // Add fallback calculation if fetch fails
+        try {
+          fetch("/calculate", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              monthlyInvestment: monthlyInvestment,
+              expectedReturnRate: expectedReturnRate,
+              timePeriod: timePeriod,
+            }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Network response was not ok");
+              }
+              return response.json();
+            })
+            .then((data) => {
+              updateUIWithCalculations(data);
+            })
+            .catch((error) => {
+              console.error("Fetch error:", error);
+              // Fallback calculation
+              performLocalCalculation();
+            });
+        } catch (error) {
+          console.error("Error in fetch:", error);
+          performLocalCalculation();
+        }
+      }
+
+      // Fallback local calculation in case the server is not available
+      function performLocalCalculation() {
+        const monthlyRate = expectedReturnRate / 100 / 12;
+        const months = timePeriod * 12;
+        const totalInvested = monthlyInvestment * months;
+
+        // SIP formula: P × ({[1 + r]^n - 1} / r) × (1 + r)
+        const futureValue =
+          monthlyInvestment *
+          ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) *
+          (1 + monthlyRate);
+
+        const estimatedReturns = futureValue - totalInvested;
+
+        const data = {
+          totalInvested: totalInvested,
+          estimatedReturns: estimatedReturns,
+          totalValue: totalInvested + estimatedReturns,
+        };
+
+        updateUIWithCalculations(data);
+      }
+
+      // Update UI with calculation results
+      function updateUIWithCalculations(data) {
+        // Update chart
+        donutChart.data.datasets[0].data = [
+          data.totalInvested,
+          data.estimatedReturns,
+        ];
+        donutChart.update();
+
+        // Add animation to the numbers
+        animateValue("total-invested", data.totalInvested);
+        animateValue("total-returns", data.estimatedReturns);
+        animateValue("total-value", data.totalValue);
+      }
+
+      // Animate number counting for a better user experience
+      function animateValue(id, endValue) {
+        const element = document.getElementById(id);
+        const startValue = parseInt(element.textContent.replace(/,/g, "") || 0);
+        const duration = 800; // ms
+        const startTime = performance.now();
+
+        function updateValue(timestamp) {
+          const elapsed = timestamp - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+
+          // Easing function for smooth animation
+          const easedProgress =
+            progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+
+          const currentValue = Math.round(
+            startValue + (endValue - startValue) * easedProgress
+          );
+          element.textContent = currentValue.toLocaleString();
+
+          if (progress < 1) {
+            requestAnimationFrame(updateValue);
+          }
+        }
+
+        requestAnimationFrame(updateValue);
+      }
+
+      // Handle window resize for chart responsiveness
+      function handleResize() {
+        if (donutChart) {
+          donutChart.resize();
+        }
+      }
+
+      // Initialize everything on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        initChart();
+        initSliders();
+        calculateSIP(); // Calculate initial values
+
+        // Add resize event listener
+        window.addEventListener("resize", handleResize);
+
+        // Handle clicks outside the editable field to save
+        document.addEventListener("click", function (e) {
+          if (isEditingInvestment && !e.target.closest("#investment-display")) {
+            const input = document.querySelector(".editable-input");
+            if (input) {
+              input.blur();
+            }
+          }
+        });
+      });
+
+      // Detect touch devices and add a class to the body
+      if ("ontouchstart" in window || navigator.maxTouchPoints > 0) {
+        document.body.classList.add("touch-device");
+      }
+    </script>
+  </body>
+</html>
